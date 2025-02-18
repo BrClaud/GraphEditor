@@ -1,0 +1,51 @@
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
+    scene = new QGraphicsScene(this);
+    view = new QGraphicsView(scene);
+    setCentralWidget(view);
+    
+    view->setMouseTracking(true);
+    view->viewport()->installEventFilter(this);
+    
+    // обработчик создания связи между кружками
+    connect(scene, &QGraphicsScene::selectionChanged, [this](){
+        auto selected = scene->selectedItems();
+        if(!selected.isEmpty() && selected.first()->type() == NodeItem::Type){
+            NodeItem *node = static_cast<NodeItem*>(selected.first());
+            if(selectedNode){
+                EdgeItem *edge = new EdgeItem(selectedNode, node);
+                scene->addItem(edge);
+                selectedNode = nullptr;
+            }else{
+                selectedNode = node;
+            }
+        }
+    });
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event){
+    if(event->type() == QEvent::MouseButtonDblClick){
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+        QPointF pos = view->mapToScene(mouseEvent->pos());
+        
+        // создание узла
+        NodeItem *node = new NodeItem(++nodeCounter);
+        node->setPos(pos);
+        scene->addItem(node);
+        return true;
+    }
+    return QMainWindow::eventFilter(obj, event);
+}
+
+void Me
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}

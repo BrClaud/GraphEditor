@@ -2,6 +2,13 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QGraphicsView>
+#include <QGraphicsScene>
+#include <QMouseEvent>
+#include <QKeyEvent>
+
+#include "edgeitem.h"
+#include "nodeitem.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -17,7 +24,17 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override
+        ;
 private:
+    QGraphicsScene *scene;
+    QGraphicsView *view;
+    int nodeCounter = 0; // счетчик узлов
+    NodeItem *selectedNode = nullptr;
     Ui::MainWindow *ui;
+
+private slots:
+    void createEdge(NodeItem *source);
 };
 #endif // MAINWINDOW_H

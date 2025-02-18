@@ -21,15 +21,15 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 protected:
-    bool eventFilter(QObject *obj, QEvent *event) override
-        ;
+    bool eventFilter(QObject *obj, QEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+
 private:
     QGraphicsScene *scene;
-    QGraphicsView *view;
     int nodeCounter = 0; // счетчик узлов
     NodeItem *selectedNode = nullptr;
     Ui::MainWindow *ui;

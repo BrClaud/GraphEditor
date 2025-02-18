@@ -10,3 +10,11 @@ NodeItem::NodeItem(int id, QGraphicsItem *parent) : QGraphicsEllipseItem(-20, -2
     label->setPos(-5, -10); // отображение по центру
 
 }
+
+void NodeItem::addEdge(EdgeItem *edge){
+    edges.append(edge);
+}
+
+void NodeItem::removeEdge(EdgeItem *edge){
+    edges.removeOne(edge);
+}

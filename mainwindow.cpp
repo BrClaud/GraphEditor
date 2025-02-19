@@ -1,10 +1,9 @@
 #include "mainwindow.h"
+
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-{
+    : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
     scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(scene);
@@ -16,48 +15,57 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionexit, &QAction::triggered, this, &QMainWindow::close);
 
     // обработчик создания связи между кружками
-    connect(scene, &QGraphicsScene::selectionChanged,this, [this](){
+    connect(scene, &QGraphicsScene::selectionChanged, this, [this]() {
         qDebug() << "создается связь между нодами\n";
         auto selected = scene->selectedItems();
-        qDebug()<<"получили выбранную ноду\n";
-        if(!selected.isEmpty() && selected.first()->type() == NodeItem::Type){
-            qDebug()<<"зашли в первый if\n";
-            NodeItem *node = static_cast<NodeItem*>(selected.first());
-            // qDebug()<<"выбранная нода id = " <<selectedNode->getId()<<" новая нода id = "<<node->getId()<<"\n";
-            if(selectedNode){
-                qDebug() << "нода уже выбрана id = "<<selectedNode->getId()<<"\n";
+        qDebug() << "получили выбранную ноду\n";
+        if (!selected.isEmpty() && selected.first()->type() == NodeItem::Type) {
+            qDebug() << "зашли в первый if\n";
+            NodeItem *node = static_cast<NodeItem *>(selected.first());
+            // qDebug()<<"выбранная нода id = " <<selectedNode->getId()<<" новая
+            // нода id = "<<node->getId()<<"\n";
+            if (selectedNode) {
+                qDebug() << "нода уже выбрана id = " << selectedNode->getId()
+                         << "\n";
 
-                bool checkEdge = false; // существует ли уже ребро между этими узлами
-                for(EdgeItem* edg : selectedNode->getEdges()){
-                    if((edg->getDest()->getId() == node->getId() && edg->getSource()->getId() == selectedNode->getId()) ||
-                        (edg->getSource()->getId() == node->getId() && edg->getDest()->getId() == selectedNode->getId()) )
-                    {
-                        qDebug()<<"ребро между нодами id_1 = " << selectedNode->getId() << " id_2 = "<<node->getId() << " уже существует\n";
+                bool checkEdge =
+                    false;  // существует ли уже ребро между этими узлами
+                for (EdgeItem *edg : selectedNode->getEdges()) {
+                    if ((edg->getDest()->getId() == node->getId() &&
+                         edg->getSource()->getId() == selectedNode->getId()) ||
+                        (edg->getSource()->getId() == node->getId() &&
+                         edg->getDest()->getId() == selectedNode->getId())) {
+                        qDebug() << "ребро между нодами id_1 = "
+                                 << selectedNode->getId()
+                                 << " id_2 = " << node->getId()
+                                 << " уже существует\n";
                         checkEdge = true;
                         break;
                     }
                 }
 
-
-                if(!checkEdge){
-                    qDebug()<<"создаем ребро между нодами id_1 = " << selectedNode->getId() << " id_2 = "<<node->getId()<<"\n";
+                if (!checkEdge) {
+                    qDebug() << "создаем ребро между нодами id_1 = "
+                             << selectedNode->getId()
+                             << " id_2 = " << node->getId() << "\n";
                     createEdge(selectedNode, node);
                 }
 
                 selectedNode = nullptr;
-            }else{
-                qDebug()<< "записали ноду id = "<<node->getId()<<" в селектед\n";
+            } else {
+                qDebug() << "записали ноду id = " << node->getId()
+                         << " в селектед\n";
                 selectedNode = node;
             }
-        }else{
-            qDebug()<<"вышли из обработчика связей\n";
+        } else {
+            qDebug() << "вышли из обработчика связей\n";
         }
     });
 }
 
-bool MainWindow::eventFilter(QObject *obj, QEvent *event){
-    if(event->type() == QEvent::MouseButtonDblClick){
-        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
+    if (event->type() == QEvent::MouseButtonDblClick) {
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
         QPointF pos = ui->graphicsView->mapToScene(mouseEvent->pos());
 
         // создание узла
@@ -70,19 +78,18 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event){
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
-    if(event->key() == Qt::Key_Delete){
-        for(auto item : scene->selectedItems()){
-            if(item->type() == NodeItem::Type){
-                NodeItem *node = static_cast<NodeItem*>(item);
-                for(auto edge: node->getEdges()){
+    if (event->key() == Qt::Key_Delete) {
+        for (auto item : scene->selectedItems()) {
+            if (item->type() == NodeItem::Type) {
+                NodeItem *node = static_cast<NodeItem *>(item);
+                for (auto edge : node->getEdges()) {
                     scene->removeItem(edge);
                     delete edge;
                 }
                 scene->removeItem(node);
                 delete node;
-            }else
-            {
-                if(item->type() == EdgeItem::Type){
+            } else {
+                if (item->type() == EdgeItem::Type) {
                     scene->removeItem(item);
                     delete item;
                 }
@@ -91,41 +98,40 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     }
 }
 
-void MainWindow::createEdge(NodeItem* source, NodeItem* dest){
-    qDebug()<<"создано ребро\n";
+void MainWindow::createEdge(NodeItem *source, NodeItem *dest) {
+    qDebug() << "создано ребро\n";
     auto selectedItems = scene->selectedItems();
-    if(!selectedItems.isEmpty() && selectedItems.first()->type() == NodeItem::Type){
-
+    if (!selectedItems.isEmpty() &&
+        selectedItems.first()->type() == NodeItem::Type) {
         EdgeItem *edge = new EdgeItem(source, dest);
         scene->addItem(edge);
     }
 }
 
-MainWindow::~MainWindow()
-{
-    delete ui;
-}
+MainWindow::~MainWindow() { delete ui; }
 
-void MainWindow::saveGraph(){
+void MainWindow::saveGraph() {
     // выбираем имя файла в диалоговом окне
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Graph"), "", tr("JSON Files (*.json)"));
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Graph"), "",
+                                                    tr("JSON Files (*.json)"));
     if (fileName.isEmpty()) return;
 
     // открываем файл для записи
     QFile file(fileName);
-    if(!file.open(QIODevice::WriteOnly)){
-        QMessageBox::warning(this,tr("Error"), tr("Could not open file for writing"));
+    if (!file.open(QIODevice::WriteOnly)) {
+        QMessageBox::warning(this, tr("Error"),
+                             tr("Could not open file for writing"));
         return;
     }
 
     // Создаем JSON-объект для хранения данных графа
     QJsonObject graphObject;
 
-    //сохраняем узлы
+    // сохраняем узлы
     QJsonArray nodesArray;
-    for(auto item : ui->graphicsView->scene()->items()){
-        if(item->type() == NodeItem::Type){
-            NodeItem *node = static_cast<NodeItem*>(item);
+    for (auto item : ui->graphicsView->scene()->items()) {
+        if (item->type() == NodeItem::Type) {
+            NodeItem *node = static_cast<NodeItem *>(item);
             QJsonObject nodeObject;
             nodeObject["id"] = node->getId();
             nodeObject["x"] = node->pos().x();
@@ -133,13 +139,13 @@ void MainWindow::saveGraph(){
             nodesArray.append(nodeObject);
         }
     }
-    graphObject["nodes"]=nodesArray;
+    graphObject["nodes"] = nodesArray;
 
-    //сохраняем связи
+    // сохраняем связи
     QJsonArray edgesArray;
-    for(auto item : ui->graphicsView->scene()->items()){
-        if(item->type() == EdgeItem::Type){
-            EdgeItem *edge = static_cast<EdgeItem*>(item);
+    for (auto item : ui->graphicsView->scene()->items()) {
+        if (item->type() == EdgeItem::Type) {
+            EdgeItem *edge = static_cast<EdgeItem *>(item);
             QJsonObject edgeObject;
             edgeObject["source"] = edge->getSource()->getId();
             edgeObject["destination"] = edge->getDest()->getId();
@@ -151,16 +157,17 @@ void MainWindow::saveGraph(){
     QJsonDocument doc(graphObject);
     file.write(doc.toJson());
     file.close();
-
 }
 
-void MainWindow::loadGraph(){
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Load Graph"), "", tr("JSON Files (*.json)"));
+void MainWindow::loadGraph() {
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Load Graph"), "",
+                                                    tr("JSON Files (*.json)"));
     if (fileName.isEmpty()) return;
 
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly)) {
-        QMessageBox::warning(this, tr("Error"), tr("Could not open file for reading."));
+        QMessageBox::warning(this, tr("Error"),
+                             tr("Could not open file for reading."));
         return;
     }
 
@@ -168,7 +175,7 @@ void MainWindow::loadGraph(){
     file.close();
 
     QJsonDocument doc = QJsonDocument::fromJson(data);
-    if(doc.isNull()){
+    if (doc.isNull()) {
         QMessageBox::warning(this, tr("Error"), tr("Invalid JSON file"));
         return;
     }
@@ -177,42 +184,29 @@ void MainWindow::loadGraph(){
 
     ui->graphicsView->scene()->clear();
 
-    QMap<int, NodeItem*> nodeMap;
+    QMap<int, NodeItem *> nodeMap;
     QJsonArray nodesArray = graphObject["nodes"].toArray();
-    for(const QJsonValue &nodeValue : nodesArray){
+    for (const QJsonValue &nodeValue : nodesArray) {
         QJsonObject nodesObject = nodeValue.toObject();
         int id = nodesObject["id"].toInt();
         qreal x = nodesObject["x"].toDouble();
         qreal y = nodesObject["y"].toDouble();
 
-        NodeItem* node = new NodeItem(id);
-        node->setPos(x,y);
+        NodeItem *node = new NodeItem(id);
+        node->setPos(x, y);
         ui->graphicsView->scene()->addItem(node);
         nodeMap[id] = node;
     }
 
     QJsonArray edgesArray = graphObject["edges"].toArray();
-    for(const QJsonValue &edgeValue : edgesArray){
+    for (const QJsonValue &edgeValue : edgesArray) {
         QJsonObject edgeObject = edgeValue.toObject();
         int sourceId = edgeObject["source"].toInt();
         int destId = edgeObject["destination"].toInt();
 
-        if(nodeMap.contains(sourceId) && nodeMap.contains(destId)){
+        if (nodeMap.contains(sourceId) && nodeMap.contains(destId)) {
             EdgeItem *edge = new EdgeItem(nodeMap[sourceId], nodeMap[destId]);
             ui->graphicsView->scene()->addItem(edge);
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

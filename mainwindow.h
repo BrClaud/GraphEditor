@@ -6,6 +6,12 @@
 #include <QGraphicsScene>
 #include <QMouseEvent>
 #include <QKeyEvent>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonValue>
 
 #include "edgeitem.h"
 #include "nodeitem.h"
@@ -36,5 +42,7 @@ private:
 
 private slots:
     void createEdge(NodeItem *source, NodeItem* dest);
+    void saveGraph();
+    void loadGraph();
 };
 #endif // MAINWINDOW_H

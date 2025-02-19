@@ -18,6 +18,7 @@ public:
     const QList<EdgeItem*>& getEdges() const{return edges;}
     int getId() {return id;}
 
+
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 

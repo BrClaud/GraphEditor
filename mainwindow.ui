@@ -40,35 +40,27 @@
     <property name="title">
      <string>menu</string>
     </property>
-    <addaction name="actionimport"/>
-    <addaction name="actionexport"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionLoad"/>
+    <addaction name="separator"/>
+    <addaction name="actionexit"/>
    </widget>
    <addaction name="menumenu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="action1">
+  <action name="actionSave">
    <property name="text">
-    <string>1</string>
+    <string>Save graph</string>
    </property>
   </action>
-  <action name="action12">
+  <action name="actionLoad">
    <property name="text">
-    <string>12</string>
+    <string>load graph</string>
    </property>
   </action>
-  <action name="action24345">
+  <action name="actionexit">
    <property name="text">
-    <string>24345</string>
-   </property>
-  </action>
-  <action name="actionimport">
-   <property name="text">
-    <string>import</string>
-   </property>
-  </action>
-  <action name="actionexport">
-   <property name="text">
-    <string>export</string>
+    <string>exit</string>
    </property>
   </action>
  </widget>

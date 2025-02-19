@@ -16,6 +16,11 @@ public:
     void addEdge(EdgeItem *edge);
     void removeEdge(EdgeItem *edge);
     const QList<EdgeItem*>& getEdges() const{return edges;}
+    int getId() {return id;}
+
+protected:
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
+
 
 private:
     int id;

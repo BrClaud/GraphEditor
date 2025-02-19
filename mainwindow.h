@@ -35,6 +35,6 @@ private:
     Ui::MainWindow *ui;
 
 private slots:
-    void createEdge(NodeItem *source);
+    void createEdge(NodeItem *source, NodeItem* dest);
 };
 #endif // MAINWINDOW_H

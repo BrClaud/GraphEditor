@@ -13,15 +13,23 @@ MainWindow::MainWindow(QWidget *parent)
 
     // обработчик создания связи между кружками
     connect(scene, &QGraphicsScene::selectionChanged,this, [this](){
+        qDebug() << "создается связь между нодами\n";
         auto selected = scene->selectedItems();
+        qDebug()<<"получили выбранную ноду\n";
         if(!selected.isEmpty() && selected.first()->type() == NodeItem::Type){
+            qDebug()<<"зашли в первый if\n";
             NodeItem *node = static_cast<NodeItem*>(selected.first());
+            // qDebug()<<"выбранная нода id = " <<selectedNode->getId()<<" новая нода id = "<<node->getId()<<"\n";
             if(selectedNode){
-                createEdge(selectedNode);
+                qDebug()<<"создаем ребро между нодами id_1 = " << selectedNode->getId() << " id_2 = "<<node->getId()<<"\n";
+                createEdge(selectedNode, node);
                 selectedNode = nullptr;
             }else{
+                qDebug()<< "записали ноду в селектед\n";
                 selectedNode = node;
             }
+        }else{
+            qDebug()<<"вышли из обработчика связей\n";
         }
     });
 }
@@ -62,10 +70,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     }
 }
 
-void MainWindow::createEdge(NodeItem* source){
+void MainWindow::createEdge(NodeItem* source, NodeItem* dest){
+    qDebug()<<"создано ребро\n";
     auto selectedItems = scene->selectedItems();
     if(!selectedItems.isEmpty() && selectedItems.first()->type() == NodeItem::Type){
-        NodeItem *dest = static_cast<NodeItem*>(selectedItems.first());
 
         EdgeItem *edge = new EdgeItem(source, dest);
         scene->addItem(edge);

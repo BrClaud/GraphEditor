@@ -2,3 +2,6 @@ build*
 *.user
 *.idx
 *.json
+*.stash
+GraphEditor
+Makefile

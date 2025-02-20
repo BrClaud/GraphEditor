@@ -12,6 +12,7 @@ class EdgeItem : public QGraphicsLineItem {
 
     NodeItem *getSource() const { return source; }
     NodeItem *getDest() const { return dest; }
+    ~EdgeItem();
 
    private:
     NodeItem *source, *dest;

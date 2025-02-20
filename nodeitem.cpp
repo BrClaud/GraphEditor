@@ -29,12 +29,13 @@ void NodeItem::removeEdge(EdgeItem *edge) { edges.removeOne(edge); }
 
 QVariant NodeItem::itemChange(GraphicsItemChange change,
                               const QVariant &value) {
-    // qDebug()<<"изменен узел "<<id<<"\n";
     if (change == QGraphicsItem::ItemPositionHasChanged) {
-        qDebug() << "перемещен узел " << id << "\n";
+        qDebug() << "изменен узел " << id << "\n";
         for (EdgeItem *edge : edges) {
             edge->updatePosition();
         }
     }
     return QGraphicsEllipseItem::itemChange(change, value);
 }
+
+NodeItem::~NodeItem() { edges.clear(); }

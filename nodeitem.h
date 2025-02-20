@@ -16,6 +16,7 @@ class NodeItem : public QGraphicsEllipseItem {
     void removeEdge(EdgeItem *edge);
     const QList<EdgeItem *> &getEdges() const { return edges; }
     int getId() { return id; }
+    ~NodeItem();
 
    protected:
     QVariant itemChange(GraphicsItemChange change,

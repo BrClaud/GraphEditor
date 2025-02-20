@@ -18,47 +18,66 @@ MainWindow::MainWindow(QWidget *parent)
     connect(scene, &QGraphicsScene::selectionChanged, this, [this]() {
         qDebug() << "создается связь между нодами\n";
         auto selected = scene->selectedItems();
-        qDebug() << "получили выбранную ноду\n";
-        if (!selected.isEmpty() && selected.first()->type() == NodeItem::Type) {
-            qDebug() << "зашли в первый if\n";
-            NodeItem *node = static_cast<NodeItem *>(selected.first());
-            // qDebug()<<"выбранная нода id = " <<selectedNode->getId()<<" новая
-            // нода id = "<<node->getId()<<"\n";
-            if (selectedNode) {
-                qDebug() << "нода уже выбрана id = " << selectedNode->getId()
-                         << "\n";
+        if (selected.size() == 1) {
+            if (!selected.isEmpty() &&
+                selected.first()->type() == NodeItem::Type) {
+                NodeItem *node = static_cast<NodeItem *>(selected.first());
+                qDebug() << "текущая выбранная нода id = " << node->getId();
+                if (selectedNode) {
+                    qDebug() << "selectedNode уже выбран id = "
+                             << selectedNode->getId() << "\n";
 
-                bool checkEdge =
-                    false;  // существует ли уже ребро между этими узлами
-                for (EdgeItem *edg : selectedNode->getEdges()) {
-                    if ((edg->getDest()->getId() == node->getId() &&
-                         edg->getSource()->getId() == selectedNode->getId()) ||
-                        (edg->getSource()->getId() == node->getId() &&
-                         edg->getDest()->getId() == selectedNode->getId())) {
-                        qDebug() << "ребро между нодами id_1 = "
-                                 << selectedNode->getId()
-                                 << " id_2 = " << node->getId()
-                                 << " уже существует\n";
-                        checkEdge = true;
-                        break;
+                    bool checkEdge =
+                        false;  // существует ли уже ребро между этими узлами
+                    for (EdgeItem *edg : selectedNode->getEdges()) {
+                        if (edg->getDest() && edg->getSource()) {
+                            if ((edg->getDest()->getId() == node->getId() &&
+                                 edg->getSource()->getId() ==
+                                     selectedNode->getId()) ||
+                                (edg->getSource()->getId() == node->getId() &&
+                                 edg->getDest()->getId() ==
+                                     selectedNode->getId())) {
+                                qDebug() << "ребро между нодами id_1 = "
+                                         << selectedNode->getId()
+                                         << " id_2 = " << node->getId()
+                                         << " уже существует\n";
+                                checkEdge = true;
+                                break;
+                            }
+                        }
                     }
-                }
+                    if (selectedNode->getId() == node->getId()) {
+                        qDebug() << "создание петли не предумотрено\n";
+                        checkEdge = true;
+                    }
 
-                if (!checkEdge) {
-                    qDebug() << "создаем ребро между нодами id_1 = "
-                             << selectedNode->getId()
-                             << " id_2 = " << node->getId() << "\n";
-                    createEdge(selectedNode, node);
-                }
+                    if (!checkEdge) {
+                        qDebug() << "создаем ребро между нодами id_1 = "
+                                 << selectedNode->getId()
+                                 << " id_2 = " << node->getId() << "\n";
+                        createEdge(selectedNode, node);
+                    }
 
-                selectedNode = nullptr;
+                    selectedNode = nullptr;
+                    // scene->clearSelection();
+                    scene->clearFocus();
+                } else {
+                    qDebug() << "записали ноду id = " << node->getId()
+                             << " в селектед\n";
+                    selectedNode = node;
+                }
             } else {
-                qDebug() << "записали ноду id = " << node->getId()
-                         << " в селектед\n";
-                selectedNode = node;
+                qDebug() << "вышли из обработчика связей\n";
+                selectedNode = nullptr;
             }
         } else {
-            qDebug() << "вышли из обработчика связей\n";
+            if (selected.size() > 1)
+                QMessageBox::information(
+                    this, "количество элементов",
+                    "колличество элементов для выбора привышено или выбранны "
+                    "некорректные элементы");
+            selectedNode = nullptr;
+            scene->clearSelection();
         }
     });
 }
@@ -79,27 +98,45 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
     if (event->key() == Qt::Key_Delete) {
-        for (auto item : scene->selectedItems()) {
-            if (item->type() == NodeItem::Type) {
-                NodeItem *node = static_cast<NodeItem *>(item);
-                for (auto edge : node->getEdges()) {
-                    scene->removeItem(edge);
-                    delete edge;
-                }
-                scene->removeItem(node);
-                delete node;
-            } else {
-                if (item->type() == EdgeItem::Type) {
-                    scene->removeItem(item);
-                    delete item;
+        if (scene->selectedItems().size() == 1) {
+            for (auto item : scene->selectedItems()) {
+                if (item->type() == NodeItem::Type) {
+                    NodeItem *node = static_cast<NodeItem *>(item);
+                    qDebug() << "удалем узел c id " << node->getId() << "\n";
+                    for (auto edge : node->getEdges()) {
+                        // scene.
+                        scene->removeItem(edge);
+                        delete edge;
+                    }
+                    scene->removeItem(node);
+                    delete node;
+                } else {
+                    if (item->type() == EdgeItem::Type) {
+                        EdgeItem *edg = static_cast<EdgeItem *>(item);
+                        qDebug()
+                            << "удалем ребро между нодами id_1 = "
+                            << edg->getDest()->getId()
+                            << " id_2 = " << edg->getSource()->getId() << "\n";
+                        scene->removeItem(item);
+                        delete item;
+                    }
                 }
             }
+            qDebug() << "очистили селектед нод\n";
+            selectedNode = nullptr;
+        } else {
+            if (scene->selectedItems().size() > 1)
+                QMessageBox::information(
+                    this, "количество элементов",
+                    "колличество элементов для выбора привышено или выбранны "
+                    "некорректные элементы");
+            selectedNode = nullptr;
+            scene->clearSelection();
         }
     }
 }
 
 void MainWindow::createEdge(NodeItem *source, NodeItem *dest) {
-    qDebug() << "создано ребро\n";
     auto selectedItems = scene->selectedItems();
     if (!selectedItems.isEmpty() &&
         selectedItems.first()->type() == NodeItem::Type) {

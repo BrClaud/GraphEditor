@@ -233,6 +233,8 @@ void MainWindow::loadGraph() {
         node->setPos(x, y);
         ui->graphicsView->scene()->addItem(node);
         nodeMap[id] = node;
+        if(node->getId() > nodeCounter)
+            nodeCounter = node->getId();
     }
 
     QJsonArray edgesArray = graphObject["edges"].toArray();
